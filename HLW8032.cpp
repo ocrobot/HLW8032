@@ -2,13 +2,12 @@
 
 HLW8032::HLW8032()
 {
-	
 }
 
 void HLW8032::begin(HardwareSerial& SerialData)
 {
 	 SerialID = &SerialData; 
-	 SerialID->begin(4800,SERIAL_8E1);   //指定4800波特率，偶校验 ->指针调用
+	 SerialID->begin(4800,SERIAL_8E1);   //指定4800波特率，偶校验  符号为->指针调用
 }
 
 void HLW8032::SerialReadLoop()
@@ -66,7 +65,7 @@ void HLW8032::SerialReadLoop()
 // 获取电压
 float HLW8032::GetVol()
 {
-	uint32_t VF = VolR1 / VolR2 ;   //求电压系数
+	VF = VolR1 / VolR2 ;   //求电压系数
 	float Vol = (VolPar / VolData) * VF;   //求电压有效值
 	return Vol;
 } 
@@ -74,10 +73,58 @@ float HLW8032::GetVol()
 //获取有效电流
 float HLW8032::GetCurrent()
 {
-	float CF = 1.0 / (CurrentRF *1000.0);    //计算电流系数
+	CF = 1.0 / (CurrentRF *1000.0);    //计算电流系数
 	float Current = (CurrentPar / CurrentData) * CF;    //计算有效电流
 	return Current;
 }
+//计算有功功率
+float HLW8032::GetActivePower()
+{
+	float Power = (PowerPar/PowerData) * VF * CF;  // 求有功功率
+	return Power;
+}
+
+//计算视在功率
+float HLW8032::GetInspectingPower()
+{
+	float vol = GetVol();
+	float current = GetCurrent();
+	return vol* current;
+}
+
+//计算功率因数
+float HLW8032::GetPowerFactor()
+{
+	float ActivePower = GetActivePower();   //获取有功功率
+	float InspectingPower = GetInspectingPower(); //视在功率
+	return ActivePower / InspectingPower ;  
+}
+
+
+//获取脉冲计数器值
+uint16_t HLW8032::GetPF()
+{
+	return PF;
+}
+
+
+//获取总脉冲数
+uint32_t HLW8032::GetPFAll()
+{
+	return PFData * PF;
+}
+
+
+//获取累积电量
+float HLW8032::GetKWh()
+{
+	float InspectingPower = GetInspectingPower(); //视在功率
+	uint32_t PFcnt = (1/PowerPar) *(1/InspectingPower) * 1000000000 * 3600   //一度电的脉冲数量
+	float KWh = (PFData * PF) / PFcnt;  //总脉冲除以1度电的脉冲量
+	return KWh;
+
+}
+
 
 //校验测试
 bool HLW8032::Checksum()
