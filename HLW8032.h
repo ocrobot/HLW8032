@@ -7,7 +7,8 @@
 #else
 #include "WProgram.h"
 #endif
-//#include "Variable.h"
+
+#include <SoftwareSerial.h>
 
 class HLW8032
 {
@@ -31,7 +32,6 @@ class HLW8032
 		byte SerialTemps[64] ;  //串口缓冲区
 		byte SeriaDataLen =0;  //数据长度计数器
 		HardwareSerial *SerialID;
-		
 		uint8_t SysStatus;  //系统状态寄存器
 		uint32_t VolPar;   //电压参数
 		uint32_t VolData;   //电压数据
