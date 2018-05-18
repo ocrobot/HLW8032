@@ -43,7 +43,7 @@ void HLW8032::SerialReadLoop()
 		if(SerialTemps[1] != 0x5A)  //标记识别,如果不是就抛弃
 		{
 			
-			Serial.println(F("0x5A error"));
+			//Serial.println(F("0x5A error"));
 			digitalWrite(_IO,LOW);
 			delay(55);
 			digitalWrite(_IO,HIGH);
@@ -53,7 +53,7 @@ void HLW8032::SerialReadLoop()
 		}
 		if(Checksum() == false)   // 校验测试，如果错误就抛弃
 		{
-			Serial.println("crc error");
+			//Serial.println("crc error");
 			return;
 		}
 		
@@ -161,12 +161,10 @@ bool HLW8032::Checksum()
 	if (check  == SerialTemps[23])
 	{
 		//校验通过
-
 		return true;
 	}
 	else
 	{
-	
 		return false;  //校验不通过
 	}
 }
