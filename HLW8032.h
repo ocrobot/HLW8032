@@ -14,7 +14,7 @@ class HLW8032
 {
 	public:
 		HLW8032();
-		void begin(HardwareSerial& SerialData);
+		void begin(HardwareSerial& SerialData,byte IO);
 		void SerialReadLoop();  //串口循环业务 获取数据，并且解码数据
 		float GetVol();   // 获取电压
 		float GetCurrent();  //获取电流
@@ -25,19 +25,24 @@ class HLW8032
 		uint32_t GetPFAll();   //获取总脉冲数
 		float GetKWh();  // 获取累积电量
 		
+		uint32_t CurrentPar; 		//电流参数
+		uint32_t CurrentData; 		//电流数据
+		byte SerialTemps[24] ;  //串口缓冲区
+		byte SeriaDataLen =0;  //数据长度计数器
+		bool SerialRead = 0;  //串口数据OK标记
+		
 	private:
 	
 		bool Checksum();   //校验函数
 		
-		byte SerialTemps[64] ;  //串口缓冲区
-		byte SeriaDataLen =0;  //数据长度计数器
+		
+		byte _IO;
 		HardwareSerial *SerialID;
 		uint8_t SysStatus;  //系统状态寄存器
 		uint32_t VolPar;   //电压参数
 		uint32_t VolData;   //电压数据
 		float VF;   //电压系数
-		uint32_t CurrentPar; 		//电流参数
-		uint32_t CurrentData; 		//电流数据
+		
 		float CF;             //电流系数
 		uint32_t PowerPar;         //功率参数
 		uint32_t PowerData;        //功率数据

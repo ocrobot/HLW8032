@@ -4,64 +4,88 @@ HLW8032::HLW8032()
 {
 }
 
-void HLW8032::begin(HardwareSerial& SerialData)
+void HLW8032::begin(HardwareSerial& SerialData,byte IO)
 {
+	 _IO = IO;
+	 pinMode(_IO,OUTPUT);
 	 SerialID = &SerialData; 
 	 SerialID->begin(4800,SERIAL_8E1);   //指定4800波特率，偶校验  符号为->指针调用
+	 //while(SerialID->read()>= 0){}
+	 digitalWrite(_IO,HIGH);
+	 
 }
 
 void HLW8032::SerialReadLoop()
 {
-	if (SerialID->available()>0)   //检查串口是否有数据，并且缓冲区是否可用
+	if (SerialID->available()>=24)   //检查串口是否有数据，并且缓冲区是否可用
 	{
 		
 		SeriaDataLen = SerialID->available();
+		//Serial.println(SeriaDataLen);
+		/*
 		if(SeriaDataLen < 24)   //缓存数据不足则跳出
 		{
+			//Serial.println(F("<24"));
 			return;
 		}
-		for (int a = 0; a < SeriaDataLen; a++)  //获取所有字节数
+		*/
+
+		//Serial.println(SeriaDataLen);
+		
+		for (byte a = 0; a < SeriaDataLen; a++)  //获取所有字节数
 		{
 			SerialTemps[a] =  SerialID->read();
 		}
+		//Serial.println(SerialID->available());
 		
 		/*处理字节*/
-		
-		if(SerialTemps[2] != 0x5A)  //标记识别,如果不是就抛弃
+
+		if(SerialTemps[1] != 0x5A)  //标记识别,如果不是就抛弃
 		{
+			
+			Serial.println(F("0x5A error"));
+			digitalWrite(_IO,LOW);
+			delay(55);
+			digitalWrite(_IO,HIGH);
+			while(SerialID->read()>= 0){}
+			
 			return;
 		}
 		if(Checksum() == false)   // 校验测试，如果错误就抛弃
 		{
+			Serial.println("crc error");
 			return;
 		}
 		
 		//如果通过了以上测试，则说明数据包应该没问题，获取其中的数据
-		
-		VolPar = ((uint32_t)SerialTemps[3]  <<16) + ((uint32_t)SerialTemps[4] <<8) + SerialTemps[5]; //获取电压参数寄存器
+		SerialRead = 1;  // 数据包完备标记
+		VolPar = ((uint32_t)SerialTemps[2]  <<16) + ((uint32_t)SerialTemps[3] <<8) + SerialTemps[4]; //获取电压参数寄存器
 		if(bitRead(SerialTemps[20], 6) == 1)  //如果电压寄存器刷新，则取数据
 		{
-			VolData = ((uint32_t)SerialTemps[6]  <<16) + ((uint32_t)SerialTemps[7] <<8) + SerialTemps[8]; //获取电压寄存器
+			VolData = ((uint32_t)SerialTemps[5]  <<16) + ((uint32_t)SerialTemps[6] <<8) + SerialTemps[7]; //获取电压寄存器
 		}
-		CurrentPar = ((uint32_t)SerialTemps[9]  <<16) + ((uint32_t)SerialTemps[10] <<8) + SerialTemps[11];  //电流参数 
+		CurrentPar = ((uint32_t)SerialTemps[8]  <<16) + ((uint32_t)SerialTemps[9] <<8) + SerialTemps[10];  //电流参数 
 		if(bitRead(SerialTemps[20], 5) == 1)   //如果电流寄存器更新，则取数据
 		{
-			CurrentData = ((uint32_t)SerialTemps[12]  <<16) + ((uint32_t)SerialTemps[13] <<8) + SerialTemps[14];  //电流
+			CurrentData = ((uint32_t)SerialTemps[11]  <<16) + ((uint32_t)SerialTemps[12] <<8) + SerialTemps[13];  //电流
 		}
-		PowerPar = ((uint32_t)SerialTemps[15]  <<16) + ((uint32_t)SerialTemps[16] <<8) + SerialTemps[17];   // 功率参数
+		PowerPar = ((uint32_t)SerialTemps[14]  <<16) + ((uint32_t)SerialTemps[15] <<8) + SerialTemps[16];   // 功率参数
 		if(bitRead(SerialTemps[20], 4) == 1)   // 如果功率寄存器数据更新，则取数据
 		{
-			PowerData = ((uint32_t)SerialTemps[18]  <<16) + ((uint32_t)SerialTemps[19] <<8) + SerialTemps[20];    //功率数据
+			PowerData = ((uint32_t)SerialTemps[17]  <<16) + ((uint32_t)SerialTemps[18] <<8) + SerialTemps[19];    //功率数据
 		}
-		PF = ((uint32_t)SerialTemps[22] <<8) + SerialTemps[23];   //脉冲数量寄存器       
+		PF = ((uint32_t)SerialTemps[21] <<8) + SerialTemps[22];   //脉冲数量寄存器       
 		
 		// 确认 PF进位寄存器是否进位，进位则添加1
 		if(bitRead(SerialTemps[20], 7) == 1)
 		{
 			PFData++;
-		}		
+		}
 	}
 }
+
+
+
 // 获取电压
 float HLW8032::GetVol()
 {
@@ -130,17 +154,19 @@ float HLW8032::GetKWh()
 bool HLW8032::Checksum()
 {
 	byte check = 0;
-	for(byte a = 2;a<=23;a++)
+	for(byte a = 2;a<=22;a++)
 	{
 		check = check + SerialTemps[a];
 	}
-	if (check  == SerialTemps[24])
+	if (check  == SerialTemps[23])
 	{
 		//校验通过
+
 		return true;
 	}
 	else
 	{
+	
 		return false;  //校验不通过
 	}
 }
