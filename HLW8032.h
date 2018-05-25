@@ -35,7 +35,6 @@ class HLW8032
 	
 		bool Checksum();   //校验函数
 		
-		
 		byte _IO;
 		HardwareSerial *SerialID;
 		uint8_t SysStatus;  //系统状态寄存器
