@@ -49,7 +49,7 @@ class HLW8032
 		uint32_t PFData = 1;           //脉冲溢出计数器
 		uint32_t VolR1 = 1880000;    //电压电阻1 470K*4  1880K
 		uint32_t VolR2 = 1000;        //电压电阻2  1K
-		float CurrentRF = 0.1;       // 电流采样电阻 0.1
+		float CurrentRF = 0.1;       // 电流采样电阻 0.1 欧姆
 };
 
 
