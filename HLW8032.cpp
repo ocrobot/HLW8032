@@ -8,6 +8,8 @@ void HLW8032::begin(HardwareSerial& SerialData,byte IO)
 {
 	 _IO = IO;
 	 pinMode(_IO,OUTPUT);
+	 digitalWrite(_IO,LOW);
+	 delay(10);
 	 SerialID = &SerialData; 
 	 SerialID->begin(4800,SERIAL_8E1);   //指定4800波特率，偶校验  符号为->指针调用
 	 //while(SerialID->read()>= 0){}
