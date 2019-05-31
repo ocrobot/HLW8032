@@ -15,6 +15,21 @@ void HLW8032::begin(HardwareSerial& SerialData,byte IO)
 	 //while(SerialID->read()>= 0){}
 	 digitalWrite(_IO,HIGH);
 	 
+	 VF = VolR1 / VolR2 ;   //求电压系数
+	 CF = 1.0 / (CurrentRF *1000.0);    //计算电流系数 
+}
+
+//写入电压系数,输入值为电压值，计算后得到修正值
+void HLW8032::setVF(float Data)
+{
+	VF = Data;
+}
+
+
+//写入电流系数
+void HLW8032::setCF(float Data)
+{
+	CF = Data;
 }
 
 void HLW8032::SerialReadLoop()
@@ -91,18 +106,32 @@ void HLW8032::SerialReadLoop()
 // 获取电压
 float HLW8032::GetVol()
 {
-	VF = VolR1 / VolR2 ;   //求电压系数
 	float Vol = (VolPar / VolData) * VF;   //求电压有效值
 	return Vol;
 } 
 
+//获取电压ADC值
+float HLW8032::GetVolAnalog()
+{
+	float Vol = VolPar / VolData;
+	return Vol; //返回厂商修正过的ADC电压值
+}
+
 //获取有效电流
 float HLW8032::GetCurrent()
 {
-	CF = 1.0 / (CurrentRF *1000.0);    //计算电流系数
 	float Current = (CurrentPar / CurrentData) * CF;    //计算有效电流
 	return Current;
 }
+
+//获取电流厂商修正adc原始值
+float HLW8032::GetCurrentAnalog()
+{
+	float Current  = CurrentPar / CurrentData；
+	return Current;
+}
+
+
 //计算有功功率
 float HLW8032::GetActivePower()
 {

@@ -15,9 +15,13 @@ class HLW8032
 	public:
 		HLW8032();
 		void begin(HardwareSerial& SerialData,byte IO);
+		void setVF(float Data);   //写入电压系数
+		void setCF(float Data) ;   //写入电流系数
 		void SerialReadLoop();  //串口循环业务 获取数据，并且解码数据
 		float GetVol();   // 获取电压
+		float GetVolAnalog();   // 获取电压原始ADC值
 		float GetCurrent();  //获取电流
+		float GetCurrentAnalog();  //获取电流原始ADC值
 		float GetActivePower();   //获取有功功率
 		float GetInspectingPower();  //获取视在功率
 		float GetPowerFactor();   //获取功率因数
