@@ -34,21 +34,17 @@ void HLW8032::setCF(float Data)
 
 void HLW8032::SerialReadLoop()
 {
-	if (SerialID->available()>=24)   //检查串口是否有数据，并且缓冲区是否可用
+	if (SerialID->available()>0)   //检查串口是否有数据，并且缓冲区是否可用
 	{
-		
+		delay(56);
 		SeriaDataLen = SerialID->available();
-		//Serial.println(SeriaDataLen);
-		/*
-		if(SeriaDataLen < 24)   //缓存数据不足则跳出
-		{
-			//Serial.println(F("<24"));
-			return;
-		}
-		*/
-
-		//Serial.println(SeriaDataLen);
 		
+		if (SeriaDataLen !=24)
+		{
+			while(SerialID->read()>= 0){}
+			//return;
+		}
+
 		for (byte a = 0; a < SeriaDataLen; a++)  //获取所有字节数
 		{
 			SerialTemps[a] =  SerialID->read();
@@ -59,13 +55,7 @@ void HLW8032::SerialReadLoop()
 
 		if(SerialTemps[1] != 0x5A)  //标记识别,如果不是就抛弃
 		{
-			
-			//Serial.println(F("0x5A error"));
-			digitalWrite(_IO,LOW);
-			delay(55);
-			digitalWrite(_IO,HIGH);
 			while(SerialID->read()>= 0){}
-			
 			return;
 		}
 		if(Checksum() == false)   // 校验测试，如果错误就抛弃
@@ -127,7 +117,7 @@ float HLW8032::GetCurrent()
 //获取电流厂商修正adc原始值
 float HLW8032::GetCurrentAnalog()
 {
-	float Current  = CurrentPar / CurrentData；
+	float Current  = CurrentPar / CurrentData;
 	return Current;
 }
 
