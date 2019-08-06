@@ -36,13 +36,13 @@ void HLW8032::SerialReadLoop()
 {
 	if (SerialID->available()>0)   //检查串口是否有数据，并且缓冲区是否可用
 	{
-		delay(56);
+		delay(55);
 		SeriaDataLen = SerialID->available();
 		
 		if (SeriaDataLen !=24)
 		{
 			while(SerialID->read()>= 0){}
-			//return;
+			return;
 		}
 
 		for (byte a = 0; a < SeriaDataLen; a++)  //获取所有字节数
@@ -53,7 +53,7 @@ void HLW8032::SerialReadLoop()
 		
 		/*处理字节*/
 
-		if(SerialTemps[1] != 0x5A)  //标记识别,如果不是就抛弃
+		if(SerialTemps[1] != 0x5A )  //标记识别,如果不是就抛弃
 		{
 			while(SerialID->read()>= 0){}
 			return;
@@ -96,36 +96,42 @@ void HLW8032::SerialReadLoop()
 // 获取电压
 float HLW8032::GetVol()
 {
-	float Vol = (VolPar / VolData) * VF;   //求电压有效值
+	float Vol = GetVolAnalog() * VF;   //求电压有效值
 	return Vol;
 } 
 
 //获取电压ADC值
 float HLW8032::GetVolAnalog()
-{
-	float Vol = VolPar / VolData;
+{	
+	float FVolPar = VolPar;   // float 计算
+	float Vol = FVolPar / VolData;
 	return Vol; //返回厂商修正过的ADC电压值
 }
 
 //获取有效电流
 float HLW8032::GetCurrent()
 {
-	float Current = (CurrentPar / CurrentData) * CF;    //计算有效电流
+	float Current = GetCurrentAnalog() * CF;    //计算有效电流
 	return Current;
+
 }
 
 //获取电流厂商修正adc原始值
 float HLW8032::GetCurrentAnalog()
 {
-	float Current  = CurrentPar / CurrentData;
+	float FCurrentPar = CurrentPar;
+	float Current  = FCurrentPar / (float)CurrentData;
 	return Current;
+	//return CurrentData;
 }
 
 
 //计算有功功率
 float HLW8032::GetActivePower()
-{
-	float Power = (PowerPar/PowerData) * VF * CF;  // 求有功功率
+{	float FPowerPar = PowerPar;
+	float FPowerData = PowerData;
+	//float Power = ((float)PowerPar/(float)PowerData) * VF * CF;  // 求有功功率
+	float Power = FPowerPar/FPowerData * VF * CF;  // 求有功功率
 	return Power;
 }
 

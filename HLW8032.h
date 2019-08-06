@@ -8,7 +8,7 @@
 #include "WProgram.h"
 #endif
 
-#include <SoftwareSerial.h>
+
 
 class HLW8032
 {
@@ -29,11 +29,19 @@ class HLW8032
 		uint32_t GetPFAll();   //获取总脉冲数
 		float GetKWh();  // 获取累积电量
 		
-		uint32_t CurrentPar; 		//电流参数
-		uint32_t CurrentData; 		//电流数据
+		
+		
 		byte SerialTemps[24] ;  //串口缓冲区
 		byte SeriaDataLen =0;  //数据长度计数器
 		bool SerialRead = 0;  //串口数据OK标记
+		
+		
+		uint32_t VolPar;             //电压参数
+		uint32_t CurrentPar; 		//电流参数
+		uint32_t PowerPar;         //功率参数
+		uint32_t CurrentData; 		//电流数据
+		float VF;   				//电压系数
+		float CF;             		//电流系数
 		
 	private:
 	
@@ -42,12 +50,10 @@ class HLW8032
 		byte _IO;
 		HardwareSerial *SerialID;
 		uint8_t SysStatus;  //系统状态寄存器
-		uint32_t VolPar;   //电压参数
-		uint32_t VolData;   //电压数据
-		float VF;   //电压系数
 		
-		float CF;             //电流系数
-		uint32_t PowerPar;         //功率参数
+		uint32_t VolData;   //电压数据
+		
+		
 		uint32_t PowerData;        //功率数据
 		uint16_t PF;               //脉冲计数器
 		uint32_t PFData = 1;           //脉冲溢出计数器
